@@ -6,6 +6,7 @@
 
 var redis = require('redis');
 var Events = require('blear.classes.events');
+var Class = require('blear.classes.class');
 var object = require('blear.utils.object');
 var typeis = require('blear.utils.typeis');
 var access = require('blear.utils.access');
@@ -73,39 +74,36 @@ var Redis = Events.extend({
 
     /**
      * 创建一个 express-session storage
+     * @param expressSession
      * @param prefix
      */
-    expressSessionStorage: function (prefix) {
+    expressSessionStorage: function (expressSession, prefix) {
         var the = this;
-        var sessionStorage = new Events();
-
+        var ExpressSessionStorage = expressSession.Store;
         prefix = prefix || 'sess:';
 
-        ['connect', 'disconnect'].forEach(function (ev) {
-            the.on(ev, function () {
-                var args = access.args(arguments);
+        var SessionStorage = Class.ify(ExpressSessionStorage).extend({
+            constructor: function () {
+                SessionStorage.parent(this);
+            },
 
-                args.unshift(ev);
-                sessionStorage.emit.apply(sessionStorage, args);
-            });
+            get: function (key, callback) {
+                the.get(prefix + key, callback);
+            },
+
+            set: function (key, val, callback) {
+                var maxAge = val.cookie && val.cookie.maxAge;
+                var expires = typeis.Number(maxAge) ? maxAge : the[_options].expires;
+
+                the.set(prefix + key, val, expires, callback);
+            },
+
+            destroy: function (key, callback) {
+                the.remove(prefix + key, callback);
+            }
         });
 
-        sessionStorage.get = function (key, callback) {
-            the.get(prefix + key, callback);
-        };
-
-        sessionStorage.set = function (key, val, callback) {
-            var maxAge = val.cookie && val.cookie.maxAge;
-            var expires = typeis.Number(maxAge) ? maxAge : the[_options].expires;
-            
-            the.set(prefix + key, val, expires, callback);
-        };
-
-        sessionStorage.destroy = function (key, callback) {
-            the.remove(prefix + key, callback);
-        };
-
-        return sessionStorage;
+        return new SessionStorage();
     },
 
 
