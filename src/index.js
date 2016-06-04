@@ -13,6 +13,7 @@ var access = require('blear.utils.access');
 var fun = require('blear.utils.function');
 var json = require('blear.utils.json');
 var date = require('blear.utils.date');
+var number = require('blear.utils.number');
 
 
 var defaults = {
@@ -157,12 +158,14 @@ var Redis = Events.extend({
         callback = fun.noop(callback);
         val = {data: val};
         val = json.stringify(val);
+
         var sett = [key, val];
 
         if (typeis.Date(expires)) {
             expires = expires.getTime() - Date.now();
         }
 
+        expires = number.parseInt(number, 0);
         var ttl = Math.floor(expires / 1000);
 
         if (ttl > 0) {
