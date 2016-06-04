@@ -14,15 +14,6 @@ var json = require('blear.utils.json');
 var date = require('blear.utils.date');
 
 
-var oneDay = date.DAY_TIME;
-
-var getTTL = function (store, sess) {
-    var maxAge = sess.cookie.maxAge;
-    return store.ttl || (typeof maxAge === 'number'
-            ? Math.floor(maxAge / 1000)
-            : oneDay / 1000);
-};
-
 var defaults = {
     url: '',
     pass: '',
@@ -82,14 +73,11 @@ var Redis = Events.extend({
 
     /**
      * 创建一个 express-session storage
-     * @param session
      * @param prefix
      */
-    expressSessionStorage: function (session, prefix) {
+    expressSessionStorage: function (prefix) {
         var the = this;
         var sessionStorage = new Events();
-        var maxAge = session.cookie.maxAge;
-        var expires = typeis.Number(maxAge) ? maxAge : the[_options].expires;
 
         prefix = prefix || 'sess:';
 
@@ -107,6 +95,9 @@ var Redis = Events.extend({
         };
 
         sessionStorage.set = function (key, val, callback) {
+            var maxAge = val.cookie && val.cookie.maxAge;
+            var expires = typeis.Number(maxAge) ? maxAge : the[_options].expires;
+            
             the.set(prefix + key, val, expires, callback);
         };
 

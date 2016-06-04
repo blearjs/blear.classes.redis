@@ -1,6 +1,6 @@
 {
   "name": "blear.classes.redis",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Redis 类，可创建 express-session storage 等",
   "scripts": {
     "live": "browser-sync start --config bs-config.js",
