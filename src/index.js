@@ -165,7 +165,7 @@ var Redis = Events.extend({
             expires = expires.getTime() - Date.now();
         }
 
-        expires = number.parseInt(number, 0);
+        expires = number.parseInt(expires, 0);
         var ttl = Math.floor(expires / 1000);
 
         if (ttl > 0) {
